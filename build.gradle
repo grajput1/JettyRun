@@ -1,0 +1,64 @@
+plugins {
+    id("java")
+    id("distribution")
+    //id("war")
+}
+
+group = "org.example"
+version = "1.0-SNAPSHOT"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly("javax.servlet:javax.servlet-api:4.0.1")
+    compileOnly("org.projectlombok:lombok:1.18.28")
+    annotationProcessor("org.projectlombok:lombok:1.18.28")
+    implementation("org.slf4j:slf4j-api:1.6.1")
+    implementation("org.slf4j:slf4j-simple:1.6.1")
+    //implementation("org.eclipse.jetty:jetty-runner:9.4.57.v20241219")
+    implementation("org.eclipse.jetty:jetty-servlet:9.4.57.v20241219")
+    implementation("org.eclipse.jetty.websocket:javax-websocket-server-impl:9.4.57.v20241219")
+    implementation("org.eclipse.jetty:apache-jsp:9.4.57.v20241219")
+    implementation("org.eclipse.jetty:apache-jstl:9.4.57.v20241219")
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+}
+
+tasks.test {
+    useJUnitPlatform()
+}
+
+task copyDependencies(type: Copy) {
+    from("src/main/webapp")
+    from(configurations.runtimeClasspath)
+            into(layout.buildDirectory.get().toString() + "/libs")
+}
+
+tasks.jar {
+    dependsOn(tasks.copyDependencies)
+}
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+
+tasks.distZip {
+    dependsOn(tasks.jar)
+}
+tasks.distTar {
+    enabled = false
+}
+
+distributions {
+    main {
+        contents {
+            into("libs") {
+                from(layout.buildDirectory.get().toString() + "/libs")
+//                from(configurations.runtimeClasspath) // Include runtime dependencies
+//                from("src/main/webapp")
+            }
+        }
+    }
+}
