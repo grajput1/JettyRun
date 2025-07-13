@@ -39,7 +39,7 @@ task copyDependencies(type: Copy) {
 tasks.jar {
     dependsOn(tasks.copyDependencies)
 }
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
 }
 
